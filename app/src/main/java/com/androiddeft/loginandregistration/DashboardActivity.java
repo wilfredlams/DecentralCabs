@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -15,15 +17,32 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapController;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 public class DashboardActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0 ;
+    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0;
     private SessionHandler session;
     MapView map = null;
+    MapController myMapController;
+    MyLocationNewOverlay mLocationOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +65,16 @@ public class DashboardActivity extends AppCompatActivity {
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
 
+        myMapController = (MapController) map.getController();
+        myMapController.setZoom(12);
+        map.setMapOrientation(0);
+
+        this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this),map);
+        this.mLocationOverlay.enableMyLocation();
+        map.getOverlays().add(this.mLocationOverlay);
+        mLocationOverlay.enableFollowLocation();
+
+
 
         welcomeText.setText("Welcome "+user.getFullName()+"\nSession Expiry: "+user.getSessionExpiryDate());
         Button logoutBtn = findViewById(R.id.btnLogout);
@@ -60,6 +89,8 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     public void requestwritepermission(){
         // Here, thisActivity is the current activity
