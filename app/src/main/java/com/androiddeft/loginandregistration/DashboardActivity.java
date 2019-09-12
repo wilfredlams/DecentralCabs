@@ -61,18 +61,22 @@ public class DashboardActivity extends AppCompatActivity {
 
         map = (MapView) findViewById(R.id.mapView);
         map.setTileSource(TileSourceFactory.MAPNIK);
-
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
 
         myMapController = (MapController) map.getController();
-        myMapController.setZoom(12);
+        myMapController.setZoom(15);
         map.setMapOrientation(0);
 
         this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this),map);
         this.mLocationOverlay.enableMyLocation();
+        this.mLocationOverlay.enableFollowLocation();
         map.getOverlays().add(this.mLocationOverlay);
-        mLocationOverlay.enableFollowLocation();
+
+
+        //GeoPoint center = ;
+        //myMapController.animateTo(center);
+
 
 
 
