@@ -16,7 +16,15 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
@@ -58,7 +66,6 @@ public class DashboardActivity extends AppCompatActivity {
         session = new SessionHandler(getApplicationContext());
         User user = session.getUserDetails();
         TextView welcomeText = findViewById(R.id.welcomeText);
-
         map = (MapView) findViewById(R.id.mapView);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
@@ -77,9 +84,6 @@ public class DashboardActivity extends AppCompatActivity {
         //GeoPoint center = ;
         //myMapController.animateTo(center);
 
-
-
-
         welcomeText.setText("Welcome "+user.getFullName()+"\nSession Expiry: "+user.getSessionExpiryDate());
         Button logoutBtn = findViewById(R.id.btnLogout);
 
@@ -92,6 +96,62 @@ public class DashboardActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        /* public void updatelatlong(){
+
+            JSONObject request = new JSONObject();
+            try {
+                //Populate the request parameters
+                request.put((locationManager) getLastKnownLocation(provider)), latitude);
+                request.put(position.lon.toFixed(3), longitude);
+                request.put(user.getUsername(), username);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            JsonObjectRequest jsArrayRequest = new JsonObjectRequest
+                    (Request.Method.POST, register_url, request, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            pDialog.dismiss();
+                            try {
+                                //Check if user got registered successfully
+                                if (response.getInt(KEY_STATUS) == 0) {
+                                    //Set the user session
+                                    session.loginUser(username,fullName);
+                                    loadDashboard();
+
+                                }else if(response.getInt(KEY_STATUS) == 1){
+                                    //Display error message if username is already existsing
+                                    etUsername.setError("Username already taken!");
+                                    etUsername.requestFocus();
+
+                                }else{
+                                    Toast.makeText(getApplicationContext(),
+                                            response.getString(KEY_MESSAGE), Toast.LENGTH_SHORT).show();
+
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            pDialog.dismiss();
+
+                            //Display error message whenever an error occurs
+                            Toast.makeText(getApplicationContext(),
+                                    error.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+            // Access the RequestQueue through your singleton class.
+            MySingleton.getInstance(this).addToRequestQueue(jsArrayRequest);
+        } */
+
     }
 
 
@@ -122,6 +182,7 @@ public class DashboardActivity extends AppCompatActivity {
         } else {
             // Permission has already been granted
         }
+
 
     }
 
