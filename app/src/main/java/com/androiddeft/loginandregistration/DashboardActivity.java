@@ -90,12 +90,12 @@ public class DashboardActivity extends AppCompatActivity {
         myMapController.setZoom(15);
         map.setMapOrientation(0);
 
-        this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this),map);
+        this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), map);
         this.mLocationOverlay.enableMyLocation();
         this.mLocationOverlay.enableFollowLocation();
         map.getOverlays().add(this.mLocationOverlay);
 
-        welcomeText.setText("Welcome "+user.getFullName()+"\nSession Expiry: "+user.getSessionExpiryDate());
+        welcomeText.setText("Welcome " + user.getFullName() + "\nSession Expiry: " + user.getSessionExpiryDate());
         Button logoutBtn = findViewById(R.id.btnLogout);
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
@@ -111,14 +111,27 @@ public class DashboardActivity extends AppCompatActivity {
         updatelatlong();
     }
 
-    private void updatelatlong(){
+    private void updatelatlong() {
+
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        double longitude = location.getLongitude();
+        double latitude = location.getLatitude();
 
         JSONObject request = new JSONObject();
         try {
-            //Populate the request parameters
-            //GeoPoint latlong = mLocationOverlay.getMyLocation().getLatitude();
-            //String latlong = mLocationOverlay.getMyLocation().getLatitude();
-            String latlong = "test";
+
+            String latlong = latitude + "," + longitude;
 
             request.put(KEY_USERNAME, user.getUsername());
             request.put(KEY_LATLONG, latlong);
@@ -164,6 +177,8 @@ public class DashboardActivity extends AppCompatActivity {
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsArrayRequest);
     }
+
+
 
     public void requestwritepermission(){
         // Here, thisActivity is the current activity
