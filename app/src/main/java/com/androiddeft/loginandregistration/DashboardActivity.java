@@ -116,10 +116,15 @@ public class DashboardActivity extends AppCompatActivity {
         JSONObject request = new JSONObject();
         try {
             //Populate the request parameters
-            GeoPoint latlong = mLocationOverlay.getMyLocation();
+            //GeoPoint latlong = mLocationOverlay.getMyLocation().getLatitude();
+            //String latlong = mLocationOverlay.getMyLocation().getLatitude();
+            String latlong = "test";
 
             request.put(KEY_USERNAME, user.getUsername());
             request.put(KEY_LATLONG, latlong);
+
+            Log.d("STATE","Username:" + user.getUsername());
+            Log.d("STATE","Latlong:" + latlong);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -129,7 +134,7 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    //Check if user got registered successfully
+                    //Check if latlong got registered successfully
                     if (response.getInt(KEY_STATUS) == 0) {
                         Log.d("STATE","Created.");
 
