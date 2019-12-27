@@ -5,6 +5,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -15,6 +18,7 @@ import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -65,8 +69,8 @@ public class DashboardActivity extends AppCompatActivity {
     MapView map = null;
     MapController myMapController;
     MyLocationNewOverlay mLocationOverlay;
-
     User user;
+    ArrayList<Marker> Markers= new ArrayList<>();
 
     private static final String KEY_USERNAME = "username";
     private static final String KEY_LATLONG = "latlong";
@@ -113,7 +117,13 @@ public class DashboardActivity extends AppCompatActivity {
         this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), map);
         this.mLocationOverlay.enableMyLocation();
         this.mLocationOverlay.enableFollowLocation();
+        Drawable currentDraw = ResourcesCompat.getDrawable(getResources(), R.drawable.user, null);
+        Bitmap currentIcon = null;
+        if (currentDraw != null) {
+            currentIcon = ((BitmapDrawable) currentDraw).getBitmap();
+        }
         map.getOverlays().add(this.mLocationOverlay);
+        mLocationOverlay.setPersonIcon(currentIcon);
 
         welcomeText.setText("Welcome " + user.getFullName() + "\nSession Expiry: " + user.getSessionExpiryDate());
         Button logoutBtn = findViewById(R.id.btnLogout);
@@ -124,35 +134,37 @@ public class DashboardActivity extends AppCompatActivity {
                 session.logoutUser();
                 Intent i = new Intent(DashboardActivity.this, LoginActivity.class);
                 startActivity(i);
+                handler.removeCallbacks(runnable);
                 finish();
             }
         });
 
 
-        refreshlatlongloop = new Handler();
+// Start the Runnable immediately
+        handler.post(runnable);
 
-        final Runnable r = new Runnable() {
-            public void run() {
-                updatelatlong();
-                drawmarkers();
-                refreshlatlongloop.postDelayed(this, 10000);
-            }
-        };
-
-        refreshlatlongloop.postDelayed(r, 10000);
     }
+
+    // Create the Handler
+    private Handler handler = new Handler();
+
+    // Define the code block to be executed
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            // Insert custom code here
+            updatelatlong();
+            drawmarkers();
+            // Repeat every 2 seconds
+            handler.postDelayed(runnable, 5000);
+        }
+    };
+
 
     private void updatelatlong() {
 
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -220,27 +232,39 @@ public class DashboardActivity extends AppCompatActivity {
         InputStream in = new BufferedInputStream(urlConnection.getInputStream());
         BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 
+            for (Marker m : Markers) {
+                map.getOverlays().remove(m);
+            }
+
             String[] array = new String[100];
 
             String line;
             int i=0;
 
             while((line = br.readLine()) != null){
+                String[] token = line.split(";");
+                String[] latlong = token[1].split(",");
 
-                String[] token = line.split (";");
-                String[] latlong = token[1].split (",");
+                if (!token[0].equals(user.getUsername())) {
+                   double latitudeE6 = Double.parseDouble(latlong[0]);
+                   double longitudeE6 = Double.parseDouble(latlong[1]);
 
-                double latitudeE6 = Double.parseDouble(latlong[0]);
-                double longitudeE6 = Double.parseDouble(latlong[1]);
+                   Log.d("STATE", "GeoPoint is " + latitudeE6 + "," + longitudeE6);
 
-                Log.d("STATE","GeoPoint is " + latitudeE6 + "," +  longitudeE6);
+                   //GeoPoint Point = new GeoPoint(-34.92866, 138.59863)
 
-                //GeoPoint Point = new GeoPoint(-34.92866, 138.59863);
-                GeoPoint Point = new GeoPoint(latitudeE6,longitudeE6);
-                Marker Marker = new Marker(map);
-                Marker.setPosition(Point);
-                Marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                map.getOverlays().add(Marker);
+                    //map.getOverlays().add(this.mLocationOverlay);
+
+                    GeoPoint Point = new GeoPoint(latitudeE6, longitudeE6);
+
+                    Marker Marker = new Marker(map);
+                    Marker.setPosition(Point);
+                    Marker.setTitle(token[0]);
+                    Marker.setIcon(getResources().getDrawable(R.drawable.aliens));
+                    Marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                    map.getOverlays().add(Marker);
+                    Markers.add(Marker);
+                   }
 
                 array[i] = line;
                 i++;
@@ -249,17 +273,6 @@ public class DashboardActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //Sample:
-        /*
-        GeoPoint Point1 = new GeoPoint(-34.92866, 138.59863);
-        Marker Marker1 = new Marker(map);
-        Marker1.setPosition(Point1);
-        Marker1.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        map.getOverlays().add(Marker1);
-        */
-
-
     }
 
 
