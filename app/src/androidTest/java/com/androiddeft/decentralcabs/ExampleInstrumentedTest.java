@@ -1,4 +1,4 @@
-package com.androiddeft.loginandregistration;
+package com.androiddeft.decentralcabs;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.androiddeft.loginandregistration", appContext.getPackageName());
+        assertEquals("com.androiddeft.decentralcabs", appContext.getPackageName());
     }
 }

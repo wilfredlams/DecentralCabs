@@ -1,4 +1,4 @@
-package com.androiddeft.loginandregistration;
+package com.androiddeft.decentralcabs;
 
 import android.content.Context;
 
