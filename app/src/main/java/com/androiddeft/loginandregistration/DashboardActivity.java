@@ -11,6 +11,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -48,6 +49,12 @@ import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
@@ -76,6 +83,16 @@ public class DashboardActivity extends AppCompatActivity {
 
         requestwritepermission();
         requestlocationpermission();
+
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+        }
 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
@@ -194,20 +211,53 @@ public class DashboardActivity extends AppCompatActivity {
 
     public void drawmarkers() {
 
+        try{
         // Put line here to read all SQL items to an array
 
+        URL url = new URL("https://yodonga.com/decab/listlatlong.php");
+
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+
+            String[] array = new String[100];
+
+            String line;
+            int i=0;
+
+            while((line = br.readLine()) != null){
+
+                String[] token = line.split (";");
+                String[] latlong = token[1].split (",");
+
+                double latitudeE6 = Double.parseDouble(latlong[0]);
+                double longitudeE6 = Double.parseDouble(latlong[1]);
+
+                Log.d("STATE","GeoPoint is " + latitudeE6 + "," +  longitudeE6);
+
+                //GeoPoint Point = new GeoPoint(-34.92866, 138.59863);
+                GeoPoint Point = new GeoPoint(latitudeE6,longitudeE6);
+                Marker Marker = new Marker(map);
+                Marker.setPosition(Point);
+                Marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                map.getOverlays().add(Marker);
+
+                array[i] = line;
+                i++;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         //Sample:
+        /*
         GeoPoint Point1 = new GeoPoint(-34.92866, 138.59863);
         Marker Marker1 = new Marker(map);
         Marker1.setPosition(Point1);
         Marker1.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         map.getOverlays().add(Marker1);
-
-        GeoPoint Point2 = new GeoPoint(-23.69748, 133.88362);
-        Marker Marker2 = new Marker(map);
-        Marker2.setPosition(Point2);
-        Marker2.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        map.getOverlays().add(Marker2);
+        */
 
 
     }
