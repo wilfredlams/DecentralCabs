@@ -10,6 +10,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -35,6 +36,7 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.util.GeoPoint;
@@ -66,6 +68,7 @@ public class DashboardActivity extends AppCompatActivity {
     private static final String KEY_EMPTY = "";
     private String latlong_url = "https://yodonga.com/decab/updateloc.php";
     private ProgressDialog pDialog;
+    private Handler refreshlatlongloop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +111,18 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-        updatelatlong();
+
+        refreshlatlongloop = new Handler();
+
+        final Runnable r = new Runnable() {
+            public void run() {
+                updatelatlong();
+                drawmarkers();
+                refreshlatlongloop.postDelayed(this, 10000);
+            }
+        };
+
+        refreshlatlongloop.postDelayed(r, 10000);
     }
 
     private void updatelatlong() {
@@ -176,6 +190,26 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsArrayRequest);
+    }
+
+    public void drawmarkers() {
+
+        // Put line here to read all SQL items to an array
+
+        //Sample:
+        GeoPoint Point1 = new GeoPoint(-34.92866, 138.59863);
+        Marker Marker1 = new Marker(map);
+        Marker1.setPosition(Point1);
+        Marker1.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        map.getOverlays().add(Marker1);
+
+        GeoPoint Point2 = new GeoPoint(-23.69748, 133.88362);
+        Marker Marker2 = new Marker(map);
+        Marker2.setPosition(Point2);
+        Marker2.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        map.getOverlays().add(Marker2);
+
+
     }
 
 
