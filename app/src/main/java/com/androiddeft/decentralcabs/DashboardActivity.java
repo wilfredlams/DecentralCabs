@@ -21,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,7 +63,8 @@ public class DashboardActivity extends AppCompatActivity {
     private static final String KEY_STATUS = "status";
     private static final String KEY_MESSAGE = "message";
     private static final String KEY_EMPTY = "";
-    private String latlong_url = "https://yodonga.com/decab/updateloc.php";
+    private String updateloc_url = "https://yodonga.com/decab/updateloc.php";
+    private String listlatlong_url = "https://yodonga.com/decab/listlatlong.php";
     private ProgressDialog pDialog;
     private Handler refreshlatlongloop;
 
@@ -111,7 +113,7 @@ public class DashboardActivity extends AppCompatActivity {
         mLocationOverlay.setPersonIcon(currentIcon);
 
         welcomeText.setText("Welcome " + user.getFullName() + "\nSession Expiry: " + user.getSessionExpiryDate());
-        Button logoutBtn = findViewById(R.id.btnLogout);
+        ImageView logoutBtn = findViewById(R.id.btnLogout);
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,6 +123,15 @@ public class DashboardActivity extends AppCompatActivity {
                 startActivity(i);
                 handler.removeCallbacks(runnable);
                 finish();
+            }
+        });
+
+        ImageView centerBtn = findViewById(R.id.btnCenter);
+        centerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myMapController.setCenter((mLocationOverlay.getMyLocation()));
+                myMapController.animateTo(mLocationOverlay.getMyLocation());
             }
         });
 
@@ -171,7 +182,7 @@ public class DashboardActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsArrayRequest = new JsonObjectRequest(Request.Method.POST, latlong_url, request, new Response.Listener<JSONObject>(){
+        JsonObjectRequest jsArrayRequest = new JsonObjectRequest(Request.Method.POST, updateloc_url, request, new Response.Listener<JSONObject>(){
             @Override
             public void onResponse(JSONObject response) {
                 try {
@@ -211,7 +222,7 @@ public class DashboardActivity extends AppCompatActivity {
         try{
         // Put line here to read all SQL items to an array
 
-        URL url = new URL("https://yodonga.com/decab/listlatlong.php");
+        URL url = new URL(listlatlong_url);
 
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         InputStream in = new BufferedInputStream(urlConnection.getInputStream());
