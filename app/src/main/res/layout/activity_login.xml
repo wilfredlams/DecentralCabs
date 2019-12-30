@@ -11,16 +11,18 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="308dp"
-        android:layout_height="133dp"
+        android:layout_width="153dp"
+        android:layout_height="115dp"
+        android:layout_gravity="center"
         android:layout_marginBottom="20dp"
         android:src="@drawable/logo" />
 
     <EditText
         android:id="@+id/etLoginUsername"
-        android:layout_width="match_parent"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
+        android:layout_gravity="center"
         android:background="@android:color/white"
         android:hint="@string/username"
         android:inputType="textPersonName"
@@ -29,9 +31,10 @@
 
     <EditText
         android:id="@+id/etLoginPassword"
-        android:layout_width="match_parent"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
+        android:layout_gravity="center"
         android:background="@android:color/white"
         android:hint="@string/password"
         android:inputType="textPassword"
@@ -39,25 +42,27 @@
 
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
+        android:layout_gravity="center"
         android:background="#f05924"
         android:text="@string/sign_in"
         android:textColor="@android:color/white" />
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:text="@string/not_having_account"
         android:textColor="#ccc" />
 
     <Button
         android:id="@+id/btnLoginRegister"
-        android:layout_width="match_parent"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
+        android:layout_gravity="center"
         android:background="#aaa"
         android:text="@string/register"
         android:textColor="@android:color/white" />
