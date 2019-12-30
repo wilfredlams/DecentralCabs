@@ -6,9 +6,9 @@
     <string name="register">Register</string>
     <string name="full_name">Full Name</string>
     <string name="confirm_password">Confirm Password</string>
-    <string name="already_having_account">Already Having an Account?</string>
+    <string name="already_having_account">Already Have an Account?</string>
     <string name="log_in">Log In</string>
-    <string name="not_having_account">Not Having an Account?</string>
+    <string name="not_having_account">Need An Account?</string>
     <string name="sign_up">Sign Up</string>
     <string name="logout">Logout</string>
 </resources>
