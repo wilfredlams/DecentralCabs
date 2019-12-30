@@ -244,15 +244,12 @@ public class DashboardActivity extends AppCompatActivity {
 
                    Log.d("STATE", "GeoPoint is " + latitudeE6 + "," + longitudeE6);
 
-                   //GeoPoint Point = new GeoPoint(-34.92866, 138.59863)
-
-                    //map.getOverlays().add(this.mLocationOverlay);
-
                     GeoPoint Point = new GeoPoint(latitudeE6, longitudeE6);
 
                     Marker Marker = new Marker(map);
                     Marker.setPosition(Point);
                     Marker.setTitle(token[0]);
+                    Marker.setSubDescription(chathead(token[0]));
                     Marker.setIcon(getResources().getDrawable(R.drawable.aliens));
                     Marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                     map.getOverlays().add(Marker);
@@ -268,6 +265,16 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
+    public String chathead(String user){
+        /*if(user == "1") {
+            return "hi";
+        }
+        else {
+            return "Bye";
+        }*/
+
+        return "Chat message from " + user + "<br> 1. 123 <br> 2. 123 <br> 3. 123 <br> 4. 123";
+    }
 
 
     public void requestpermissions(){
