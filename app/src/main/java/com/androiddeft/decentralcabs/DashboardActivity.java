@@ -195,13 +195,21 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void updatelatlong() {
 
+        double longitude = 0;
+        double latitude  = 0;
+
+        try {
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        double longitude = location.getLongitude();
-        double latitude = location.getLatitude();
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         JSONObject request = new JSONObject();
         try {
