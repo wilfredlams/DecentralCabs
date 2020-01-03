@@ -1,7 +1,6 @@
 package com.androiddeft.decentralcabs;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,8 +18,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,15 +31,19 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.maps.GoogleMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -55,6 +61,7 @@ public class DashboardActivity extends AppCompatActivity {
     MapView map = null;
     MapController myMapController;
     MyLocationNewOverlay mLocationOverlay;
+    EditText chatbox;
     User user;
     ArrayList<Marker> Markers= new ArrayList<>();
 
@@ -88,7 +95,6 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
         session = new SessionHandler(getApplicationContext());
         user = session.getUserDetails();
-        TextView welcomeText = findViewById(R.id.welcomeText);
         map = (MapView) findViewById(R.id.mapView);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
@@ -98,9 +104,9 @@ public class DashboardActivity extends AppCompatActivity {
         myMapController.setZoom(15);
         map.setMapOrientation(0);
 
-        this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), map);
-        this.mLocationOverlay.enableMyLocation();
-        this.mLocationOverlay.enableFollowLocation();
+        mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), map);
+        mLocationOverlay.enableMyLocation();
+        mLocationOverlay.enableFollowLocation();
         Drawable currentDraw = ResourcesCompat.getDrawable(getResources(), R.drawable.user, null);
         Bitmap currentIcon = null;
         if (currentDraw != null) {
@@ -108,8 +114,24 @@ public class DashboardActivity extends AppCompatActivity {
         }
         map.getOverlays().add(this.mLocationOverlay);
         mLocationOverlay.setPersonIcon(currentIcon);
+        mLocationOverlay.setDirectionArrow(currentIcon, currentIcon);
 
-        welcomeText.setText("Welcome " + user.getFullName() + "\nSession Expiry: " + user.getSessionExpiryDate());
+        map.getOverlays().add(0, mLocationOverlay);
+
+        map.getOverlays().add(new MapEventsOverlay(new MapEventsReceiver() {
+
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                for (Marker m : Markers) {
+                    // m.closeInfoWindow();
+                }
+                return true;
+            }
+
+            public boolean longPressHelper(GeoPoint p) {
+                return false;
+            }
+        }));
+
         ImageView logoutBtn = findViewById(R.id.btnLogout);
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
@@ -132,9 +154,26 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
+        chatbox = findViewById(R.id.chatbox);
+
+        chatbox.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    processchatbox(chatbox.getText().toString());
+                    chatbox.setText(null);
+                    return true;
+                }
+                return false;
+            }
+        });
 
 // Start the Runnable immediately
         handler.post(runnable);
+    }
+
+    public void processchatbox(String text) {
+
 
     }
 
@@ -235,7 +274,7 @@ public class DashboardActivity extends AppCompatActivity {
             int i=0;
 
             while((line = br.readLine()) != null){
-                String[] token = line.split(";");
+                final String[] token = line.split(";");
                 String[] latlong = token[1].split(",");
 
                 if (!token[0].equals(user.getUsername())) {
@@ -246,12 +285,30 @@ public class DashboardActivity extends AppCompatActivity {
 
                     GeoPoint Point = new GeoPoint(latitudeE6, longitudeE6);
 
-                    Marker Marker = new Marker(map);
+                    final Marker Marker = new Marker(map);
                     Marker.setPosition(Point);
-                    Marker.setTitle(token[0]);
+                    Marker.setTitle(token[0].toUpperCase());
                     Marker.setSubDescription(chathead(token[0]));
                     Marker.setIcon(getResources().getDrawable(R.drawable.aliens));
                     Marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+                    Marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+                        @Override
+                        public boolean onMarkerClick(org.osmdroid.views.overlay.Marker marker, MapView mapView) {
+                            Marker.showInfoWindow();
+                            chatbox.setText("@" + token[0] + ":");
+                            chatbox.setSelection(chatbox.getText().length());
+
+                            InputMethodManager inputMethodManager =
+                                    (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                            inputMethodManager.toggleSoftInputFromWindow(
+                                    chatbox.getApplicationWindowToken(),
+                                    InputMethodManager.SHOW_FORCED, 0);
+
+                            return false;
+                        }
+                    });
+
                     map.getOverlays().add(Marker);
                     Markers.add(Marker);
                    }
